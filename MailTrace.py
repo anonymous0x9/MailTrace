@@ -17,7 +17,7 @@ from rich.align import Align
 from rich.columns import Columns
 from rich import box
 
-console = Console()
+console = Console(stderr=True)
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  NORMALIZER — fixes single-line pasted headers
@@ -199,8 +199,6 @@ def spam_score(headers: dict) -> tuple:
 # ══════════════════════════════════════════════════════════════════════════════
 
 def render_analysis(raw: str):
-    # console.clear()  # Removed to avoid double clearing
-
     headers  = parse_headers(raw)
     received = extract_received(raw)
 
@@ -335,25 +333,24 @@ def render_analysis(raw: str):
 # ══════════════════════════════════════════════════════════════════════════════
 
 def get_input() -> str:
-    console.print(Panel(
-        Text.assemble(
-            Text("Paste raw email headers below.\n", style="bold cyan"),
-            Text("Supports both multiline and single-line paste.\n", style="dim"),
-            Text("Type ", style="dim"), Text("END", style="bold yellow"),
-            Text(" on a new line and press Enter when done.", style="dim"),
-        ),
-        border_style="blue", box=box.SIMPLE,
-    ))
-    lines = []
-    try:
-        while True:
-            line = input()
-            if line.strip().upper() == "END":
-                break
-            lines.append(line)
-    except (KeyboardInterrupt, EOFError):
-        pass
-    return "\n".join(lines)
+    if sys.stdin.isatty():
+        sys.stdout.write("\n--- Paste headers above, type END when done ---\n")
+        sys.stdout.flush()
+        lines = []
+        try:
+            while True:
+                line = input()
+                if line.strip().upper() == "END":
+                    break
+                lines.append(line)
+        except EOFError:
+            return None
+        except KeyboardInterrupt:
+            return None
+        return "\n".join(lines)
+    else:
+        stdin_data = sys.stdin.read()
+        return stdin_data
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -372,6 +369,8 @@ def main():
 
     while True:
         raw = get_input()
+        if raw is None:
+            break
         if not raw.strip():
             console.print("[red]No input detected. Please paste headers and type END.[/red]\n")
             continue
