@@ -68,6 +68,72 @@ END
 ### Example Output
 The tool displays a formatted analysis with color-coded results, tables for routing, and a risk score bar.
 
+#### Sample TUI Output
+Here's a text representation of the TUI (colors and styles are rendered in the terminal):
+
+```
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                           Email Header Analyzer                           ║
+║                     Analyzed at 2026-04-08 12:00:00                       ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+──────────────────────────────── Basic Info ────────────────────────────────
+Field          Value
+─────────────  ─────────────────────────────────────────────────────────────
+From           sender@example.com
+To             recipient@domain.com
+Reply-To       reply@phishingsite.com
+Subject        Urgent: Verify Your Account
+Date           Mon, 08 Apr 2026 10:30:00 +0000
+Message-ID     <abc123@example.com>
+Mailer         —
+
+
+──────────────────────────────── Authentication ─────────────────────────────
+┌─────────┐  ┌─────────┐  ┌─────────┐
+│   SPF   │  │  DKIM   │  │  DMARC  │
+│         │  │         │  │         │
+│  FAIL ⚠ │  │   PASS  │  │  FAIL ⚠ │
+└─────────┘  └─────────┘  └─────────┘
+
+──────────────────────────────── Email Routing (Hops) ──────────────────────
+Hop  Raw header                          IPs found             rDNS
+───  ──────────────────────────────────  ────────────────────  ────────────
+1    from mail.phish.com (mail.phish…    192.168.1.1           —
+2    by smtp.example.com with SMTP…      203.0.113.1           smtp.example.com
+
+──────────────────────────────── Public IPs Detected ───────────────────────
+IP Address     Reverse DNS                    Private?
+─────────────  ─────────────────────────────  ──────────
+203.0.113.1    smtp.example.com               No
+
+──────────────────────────────── Spam / Phishing Score ─────────────────────
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  Score: 75/100  █████████████████░░░                                      ║
+║  Verdict: HIGH RISK — likely spam or phishing                            ║
+║                                                                          ║
+║  • SPF failed                                                            ║
+║  • DMARC failed                                                          ║
+║  • Reply-To domain mismatch                                              ║
+║  • Spam keyword in subject: 'urgent'                                     ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+──────────────────────────────── All Headers ────────────────────────────────
+Header               Value
+───────────────────  ────────────────────────────────────────────────────────
+from                 sender@example.com
+to                   recipient@domain.com
+subject              Urgent: Verify Your Account
+...                  ...
+
+Options:
+  a — Analyze another email
+  s — Save report to file
+  q — Quit
+
+Command:
+```
+
 ## How It Works
 
 - **Parsing**: Splits headers into key-value pairs, handling folded lines.
