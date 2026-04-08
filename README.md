@@ -21,6 +21,12 @@ A powerful Terminal User Interface (TUI) tool for analyzing raw email headers to
 - pip (Python package installer)
 
 ### Install Dependencies
+Run the setup script:
+```bash
+./setup.sh
+```
+
+Or manually install:
 ```bash
 pip install rich
 ```
